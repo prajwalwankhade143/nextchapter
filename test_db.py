@@ -1,8 +1,5 @@
-from db import get_connection
+import sqlite3
 
-conn = get_connection()
-
-if conn.is_connected():
-    print("✅ Database connected successfully")
-else:
-    print("❌ Connection failed")
+def get_connection():
+    conn = sqlite3.connect("nextchapter.db", check_same_thread=False)
+    return conn

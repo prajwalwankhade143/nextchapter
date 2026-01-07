@@ -1,35 +1,28 @@
 import streamlit as st
 from auth import register, login
 
-st.set_page_config(page_title="NextChapter", layout="centered")
+st.set_page_config(page_title="NextChapter")
 
-st.title("💔 NextChapter")
-st.write("Heal. Analyze. Move Forward.")
+st.title("NextChapter")
 
-menu = ["Login", "Register"]
-choice = st.sidebar.selectbox("Menu", menu)
+choice = st.sidebar.selectbox("Menu", ["Register", "Login"])
 
 if choice == "Register":
-    st.subheader("Create Account")
-
     name = st.text_input("Name")
     email = st.text_input("Email")
     password = st.text_input("Password", type="password")
 
     if st.button("Register"):
         register(name, email, password)
-        st.success("Account created successfully!")
+        st.success("Registered successfully")
 
-elif choice == "Login":
-    st.subheader("Login")
-
+if choice == "Login":
     email = st.text_input("Email")
     password = st.text_input("Password", type="password")
 
     if st.button("Login"):
         user = login(email, password)
         if user:
-            st.success("Login successful!")
-            st.write("Welcome to your healing journey 🌱")
+            st.success("Login successful")
         else:
             st.error("Invalid credentials")

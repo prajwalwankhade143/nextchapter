@@ -1,36 +1,27 @@
-import hashlib
 from db import get_connection
-
-def hash_password(password):
-    return hashlib.sha256(password.encode()).hexdigest()
+import hashlib
 
 def register(name, email, password):
     conn = get_connection()
     cur = conn.cursor()
+    hashed_pw = hashlib.sha256(password.encode()).hexdigest()
 
-    hashed_pw = hash_password(password)
-
-   cur.execute(
-    "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
-    (name, email, hashed_pw)
-)
-
+    cur.execute(
+        "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
+        (name, email, hashed_pw)
+    )
     conn.commit()
     conn.close()
 
 def login(email, password):
     conn = get_connection()
     cur = conn.cursor()
-
-    hashed_pw = hash_password(password)
+    hashed_pw = hashlib.sha256(password.encode()).hexdigest()
 
     cur.execute(
-    "SELECT * FROM users WHERE email=? AND password=?",
-    (email, hashed_pw)
-)
-
-
+        "SELECT * FROM users WHERE email=? AND password=?",
+        (email, hashed_pw)
+    )
     user = cur.fetchone()
     conn.close()
-
     return user

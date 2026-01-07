@@ -1,4 +1,5 @@
 import streamlit as st
+ADMIN_EMAIL = "prajwalwankhade202@gmail.com"
 from auth import register, login
 from db import get_connection
 from ai_model import analyze_sentiment
@@ -17,7 +18,16 @@ st.write("DEBUG ▶ user_email:", st.session_state.user_email)
 
 # -------- SIDEBAR --------
 if st.session_state.logged_in:
-    page = st.sidebar.radio("Menu", ["Dashboard", "Add Journey", "Analyze", "Admin", "Logout"])
+    if st.session_state.user_email == ADMIN_EMAIL:
+        page = st.sidebar.radio(
+            "Menu",
+            ["Dashboard", "Add Journey", "Analyze", "Admin", "Logout"]
+        )
+    else:
+        page = st.sidebar.radio(
+            "Menu",
+            ["Dashboard", "Add Journey", "Analyze", "Logout"]
+        )
 else:
     page = st.sidebar.radio("Menu", ["Register", "Login"])
 
@@ -97,20 +107,21 @@ if page == "Analyze":
     if st.button("Analyze"):
         result = analyze_sentiment(text)
         st.success(f"AI Result: {result}")
-        # -------- ADMIN PAGE --------
-st.subheader("🛠️ Admin: Registered Users")
-conn = get_connection()
-cur = conn.cursor()
-cur.execute("SELECT id, name, email FROM users ORDER BY id DESC")
-users = cur.fetchall()
-conn.close()
+# -------- ADMIN PAGE --------
+if page == "Admin":
+    st.subheader("🛠️ Admin Panel – Registered Users")
 
-if users:
-    for u in users:
-        st.write(f"ID: {u[0]} | Name: {u[1]} | Email: {u[2]}")
-else:
-    st.info("No users registered yet.")
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id, name, email FROM users ORDER BY id DESC")
+    users = cur.fetchall()
+    conn.close()
 
+    if users:
+        for u in users:
+            st.write(f"ID: {u[0]} | Name: {u[1]} | Email: {u[2]}")
+    else:
+        st.info("No users found")
 
 # -------- LOGOUT --------
 if page == "Logout":

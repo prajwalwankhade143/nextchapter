@@ -97,25 +97,19 @@ if page == "Analyze":
     if st.button("Analyze"):
         result = analyze_sentiment(text)
         st.success(f"AI Result: {result}")
-        # ------------------ ADMIN PAGE ------------------
-admin_email = "tumhara_email@example.com"  # <-- Yahan apna email daal do
+        # -------- ADMIN PAGE --------
+st.subheader("🛠️ Admin: Registered Users")
+conn = get_connection()
+cur = conn.cursor()
+cur.execute("SELECT id, name, email FROM users ORDER BY id DESC")
+users = cur.fetchall()
+conn.close()
 
-if st.session_state.user_email != admin_email:
-    st.error("❌ You are not authorized to view this page")
+if users:
+    for u in users:
+        st.write(f"ID: {u[0]} | Name: {u[1]} | Email: {u[2]}")
 else:
-    st.subheader("🛠️ Admin: Registered Users")
-
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT id, name, email FROM users ORDER BY id DESC")
-    users = cur.fetchall()
-    conn.close()
-
-    if users:
-        for u in users:
-            st.write(f"ID: {u[0]} | Name: {u[1]} | Email: {u[2]}")
-    else:
-        st.info("No users registered yet.")
+    st.info("No users registered yet.")
 
 
 # -------- LOGOUT --------

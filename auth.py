@@ -10,10 +10,10 @@ def register(name, email, password):
 
     hashed_pw = hash_password(password)
 
-    cur.execute(
-        "INSERT INTO users (name, email, password) VALUES (%s, %s, %s)",
-        (name, email, hashed_pw)
-    )
+   cur.execute(
+    "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
+    (name, email, hashed_pw)
+)
 
     conn.commit()
     conn.close()
@@ -25,9 +25,10 @@ def login(email, password):
     hashed_pw = hash_password(password)
 
     cur.execute(
-        "SELECT user_id, name FROM users WHERE email=%s AND password=%s",
-        (email, hashed_pw)
-    )
+    "SELECT * FROM users WHERE email=? AND password=?",
+    (email, hashed_pw)
+)
+
 
     user = cur.fetchone()
     conn.close()

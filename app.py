@@ -24,6 +24,42 @@ label, .stTextLabel { color: #e5e7eb !important; }
 .title { font-size:30px; font-weight:800; margin-bottom:5px; }
 </style>
 """, unsafe_allow_html=True)
+st.markdown("""
+<style>
+/* Sidebar background */
+section[data-testid="stSidebar"] {
+    background-color: #0b1220;
+}
+
+/* Radio buttons container */
+div[role="radiogroup"] > label {
+    background-color: #1f2933;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    color: #e5e7eb !important;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    border: 1px solid #2d3748;
+}
+
+/* Hover effect */
+div[role="radiogroup"] > label:hover {
+    background-color: #2563eb;
+    color: #ffffff !important;
+    transform: scale(1.02);
+}
+
+/* Selected menu item */
+div[role="radiogroup"] > label[data-checked="true"] {
+    background-color: #22c55e !important;
+    color: #0f172a !important;
+    box-shadow: 0 4px 12px rgba(34,197,94,0.4);
+}
+</style>
+""", unsafe_allow_html=True)
+
 
 # -------- SESSION INIT --------
 st.session_state.setdefault("logged_in", False)
@@ -34,15 +70,38 @@ st.session_state.setdefault("page", "Register")  # default page
 st.markdown('<div class="title">🌱 NextChapter</div>', unsafe_allow_html=True)
 st.caption("Your personal healing & reflection space")
 
-# -------- SIDEBAR --------
-if not st.session_state.logged_in:
-    page = st.sidebar.radio("Menu", ["Register", "Login"])
-else:
-    menu = ["Dashboard", "Add Journey", "Analyze", "Letters", "Breakup Timeline", "Gratitude", "Logout"]
-    if st.session_state.user_email == ADMIN_EMAIL:
-        menu.insert(3, "Admin")
-    page = st.sidebar.radio("Menu", menu)
+# -------- SIDEBAR MENU --------
+with st.sidebar:
+    st.markdown("### 📍 Navigation")
+
+    if not st.session_state.logged_in:
+        page = st.radio(
+            "",
+            ["Register", "Login"],
+            label_visibility="collapsed"
+        )
+    else:
+        menu = [
+            "Dashboard",
+            "Add Journey",
+            "Analyze",
+            "Letters",
+            "Breakup Timeline",
+            "Gratitude",
+            "Logout"
+        ]
+
+        if st.session_state.user_email == ADMIN_EMAIL:
+            menu.insert(3, "Admin")
+
+        page = st.radio(
+            "",
+            menu,
+            label_visibility="collapsed"
+        )
+
     st.session_state.page = page
+
 
 
 # -------- REGISTER --------

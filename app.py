@@ -150,12 +150,11 @@ elif page == "Dashboard":
         df = pd.DataFrame(data, columns=["mood","note","private","date"])
         df["date"] = pd.to_datetime(df["date"]).dt.date
 
-        # Filter last 7 days public entries
-        dfp = df[(df["private"]==0)&(df["date"]>=date.today()-timedelta(days=6))]
-
+        # -------- FILTER LAST 7 DAYS PUBLIC --------
+        dfp = df[(df["private"]==0) & (df["date"]>=date.today()-timedelta(days=6))]
         score_map = {"Sad 😔":1,"Low 😞":2,"Neutral 😐":3,"Positive 😊":4}
 
-        # -------- MOOD LINE CHART --------
+        # -------- LINE CHART: MOOD TREND --------
         if not dfp.empty:
             dfp["score"] = dfp["mood"].map(score_map)
             fig, ax = plt.subplots(figsize=(7,3))
@@ -174,7 +173,6 @@ elif page == "Dashboard":
                     streak += 1
                 else:
                     break
-
             st.markdown(f"""
             <div class="card" style="background:linear-gradient(135deg,#22c55e,#16a34a);color:#0f172a;text-align:center;">
                 <b>🔥 Current Streak</b><br>
@@ -182,15 +180,15 @@ elif page == "Dashboard":
             </div>
             """, unsafe_allow_html=True)
 
-            # -------- MOOD DISTRIBUTION PIE CHART --------
+            # -------- PIE CHART: MOOD DISTRIBUTION --------
             mood_counts = dfp["mood"].value_counts()
             fig2, ax2 = plt.subplots(figsize=(4,4))
-            colors=["#f87171","#fbbf24","#60a5fa","#34d399"]
+            colors = ["#f87171","#fbbf24","#60a5fa","#34d399"]
             ax2.pie(mood_counts, labels=mood_counts.index, autopct='%1.1f%%', startangle=90, colors=colors)
             ax2.set_title("Mood Distribution (Last 7 Days)")
             st.pyplot(fig2, clear_figure=True)
 
-        # -------- MOOD SUMMARY CARDS --------
+        # -------- SUMMARY CARDS --------
         total_entries = len(df)
         avg_score = round(df["mood"].map(score_map).mean(),2)
         last_mood = df.iloc[0]["mood"]
@@ -209,7 +207,7 @@ elif page == "Dashboard":
         </div>
         """, unsafe_allow_html=True)
 
-        # -------- MOOD AI SUGGESTION --------
+        # -------- AI MOOD SUGGESTION --------
         mood_ai = analyze_sentiment(df.iloc[0]["note"])
         suggestion_map = {
             "Sad 😔":"Try a short walk or write 3 things you’re grateful for 🌸",
@@ -220,7 +218,7 @@ elif page == "Dashboard":
         st.markdown(f"**🤖 Mood:** {mood_ai}")
         st.markdown(f"**💡 Suggestion:** {suggestion_map[mood_ai]}")
 
-        # -------- ALL ENTRIES LIST --------
+        # -------- ALL JOURNEY ENTRIES --------
         for m, n, p, d in data:
             st.markdown(f"""
             <div class="card">

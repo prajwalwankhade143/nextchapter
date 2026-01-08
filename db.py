@@ -21,6 +21,39 @@ def get_connection():
         user_email TEXT,
         mood TEXT,
         note TEXT,
+        is_private INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    # Letters table
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS letters (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT,
+        title TEXT,
+        content TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    # Breakup table
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS breakup (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT,
+        breakup_date DATE,
+        no_contact_days INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    # Gratitude table
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS gratitude (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT,
+        note TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)

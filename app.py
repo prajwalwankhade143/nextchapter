@@ -1,4 +1,24 @@
 import streamlit as st
+st.markdown(
+    """
+    <style>
+    /* Text color fix for white containers */
+    div[data-testid="stContainer"] *,
+    div[data-testid="stMarkdown"] *,
+    div[data-testid="stText"] {
+        color: #111111 !important;
+    }
+
+    /* Input boxes text */
+    textarea, input, select {
+        color: #111111 !important;
+        background-color: #ffffff !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 from auth import register, login
 from db import get_connection
 from ai_model import analyze_sentiment

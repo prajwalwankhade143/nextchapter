@@ -1,23 +1,4 @@
 import streamlit as st
-st.markdown(
-    """
-    <style>
-    /* Fix input text visibility only */
-    input, textarea, select {
-        color: #000000 !important;
-        background-color: #ffffff !important;
-    }
-
-    /* Fix labels */
-    label, .stTextLabel {
-        color: #ffffff !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-
 from auth import register, login
 from db import get_connection
 from ai_model import analyze_sentiment
@@ -30,27 +11,49 @@ st.set_page_config(
     layout="centered"
 )
 
+# -------- GLOBAL STYLE (NO WHITE BACKGROUND) --------
+st.markdown(
+    """
+    <style>
+    body {
+        background-color: #0e1117;
+        color: #ffffff;
+    }
+
+    input, textarea, select {
+        color: #ffffff !important;
+        background-color: #1f2933 !important;
+        border-radius: 8px;
+    }
+
+    label, .stTextLabel {
+        color: #e5e7eb !important;
+    }
+
+    .card {
+        background-color:#1f2933;
+        padding:20px;
+        border-radius:14px;
+        box-shadow:0 6px 18px rgba(0,0,0,0.4);
+        margin-bottom:15px;
+        color:#ffffff;
+    }
+
+    .title {
+        font-size:30px;
+        font-weight:800;
+        margin-bottom:5px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # -------- SESSION INIT --------
 st.session_state.setdefault("logged_in", False)
 st.session_state.setdefault("user_email", None)
 
 # -------- HEADER --------
-st.markdown("""
-<style>
-.card {
-    background-color:#f9f9f9;
-    padding:20px;
-    border-radius:12px;
-    box-shadow:0 4px 10px rgba(0,0,0,0.08);
-    margin-bottom:15px;
-}
-.title {
-    font-size:28px;
-    font-weight:700;
-}
-</style>
-""", unsafe_allow_html=True)
-
 st.markdown('<div class="title">🌱 NextChapter</div>', unsafe_allow_html=True)
 st.caption("Your personal healing & reflection space")
 
@@ -99,6 +102,7 @@ if page == "Login":
 # -------- DASHBOARD --------
 if page == "Dashboard":
     st.subheader("🌿 Your Journey")
+
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
@@ -112,14 +116,17 @@ if page == "Dashboard":
         st.info("No entries yet ✍️")
     else:
         for mood, note, date in data:
-            st.markdown(f"""
-            <div class="card">
-                <b>{mood}</b><br>
-                <small>{date}</small>
-                <hr>
-                {note}
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown(
+                f"""
+                <div class="card">
+                    <b>{mood}</b><br>
+                    <small>{date}</small>
+                    <hr>
+                    {note}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
 # -------- ADD JOURNEY --------
 if page == "Add Journey":
@@ -164,14 +171,20 @@ if page == "Admin":
     users = cur.fetchall()
     conn.close()
 
-    for u in users:
-        st.markdown(f"""
-        <div class="card">
-            <b>ID:</b> {u[0]}<br>
-            <b>Name:</b> {u[1]}<br>
-            <b>Email:</b> {u[2]}
-        </div>
-        """, unsafe_allow_html=True)
+    if not users:
+        st.info("No users found yet")
+    else:
+        for u in users:
+            st.markdown(
+                f"""
+                <div class="card">
+                    <b>ID:</b> {u[0]}<br>
+                    <b>Name:</b> {u[1]}<br>
+                    <b>Email:</b> {u[2]}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
 # -------- LOGOUT --------
 if page == "Logout":

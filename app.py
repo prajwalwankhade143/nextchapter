@@ -34,60 +34,6 @@ st.session_state.setdefault("page", "Register")  # default page
 st.markdown('<div class="title">🌱 NextChapter</div>', unsafe_allow_html=True)
 st.caption("Your personal healing & reflection space")
 
-# -------- SIDEBAR BUTTON STYLE & MENU --------
-st.markdown("""
-<style>
-/* Sidebar background */
-[data-testid="stSidebar"] { background-color: #1f2933; padding: 10px; }
-
-/* Sidebar buttons */
-.sidebar-btn {
-    display: block;
-    width: 100%;
-    text-align: left;
-    padding: 10px 15px;
-    margin-bottom: 8px;
-    border-radius: 10px;
-    background-color: #111827;
-    color: #ffffff;
-    font-weight: 600;
-    font-size: 16px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-/* Hover effect */
-.sidebar-btn:hover { background-color: #4ade80; color: #111827; }
-
-/* Selected page highlight */
-.sidebar-btn.selected { background-color: #4ade80; color: #111827; }
-</style>
-""", unsafe_allow_html=True)
-
-# -------- SIDEBAR MENU --------
-if not st.session_state.logged_in:
-    menu_items = ["Register", "Login"]
-else:
-    menu_items = ["Dashboard", "Add Journey", "Analyze", "Letters",
-                  "Breakup Timeline", "Gratitude", "Logout"]
-    if st.session_state.user_email == ADMIN_EMAIL:
-        menu_items.insert(3, "Admin")
-
-for item in menu_items:
-    selected_class = "selected" if st.session_state.get("page") == item else ""
-    if st.button(item, key=item):
-        st.session_state.page = item
-        st.rerun()
-    # Add our custom class to Streamlit button
-    st.markdown(f"""
-        <script>
-        const btns = window.parent.document.querySelectorAll('button[kind="primary"]');
-        btns.forEach(b => {{
-            if(b.innerText.includes('{item}')) b.classList.add('sidebar-btn','{selected_class}');
-        }});
-        </script>
-    """, unsafe_allow_html=True)
 
 
 # -------- REGISTER --------

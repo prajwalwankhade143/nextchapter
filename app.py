@@ -14,19 +14,16 @@ st.set_page_config(
     layout="centered"
 )
 
-# -------- GLOBAL STYLE (NO WHITE BACKGROUND) --------
-st.markdown(
-    """
-    <style>
-    body { background-color: #0e1117; color: #ffffff; }
-    input, textarea, select { color: #ffffff !important; background-color: #1f2933 !important; border-radius: 8px; }
-    label, .stTextLabel { color: #e5e7eb !important; }
-    .card { background-color:#1f2933; padding:20px; border-radius:14px; box-shadow:0 6px 18px rgba(0,0,0,0.4); margin-bottom:15px; color:#ffffff; }
-    .title { font-size:30px; font-weight:800; margin-bottom:5px; }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+# -------- GLOBAL STYLE (DARK MODE) --------
+st.markdown("""
+<style>
+body { background-color: #0e1117; color: #ffffff; }
+input, textarea, select { color: #ffffff !important; background-color: #1f2933 !important; border-radius: 8px; }
+label, .stTextLabel { color: #e5e7eb !important; }
+.card { background-color:#1f2933; padding:20px; border-radius:14px; box-shadow:0 6px 18px rgba(0,0,0,0.4); margin-bottom:15px; color:#ffffff; }
+.title { font-size:30px; font-weight:800; margin-bottom:5px; }
+</style>
+""", unsafe_allow_html=True)
 
 # -------- SESSION INIT --------
 st.session_state.setdefault("logged_in", False)
@@ -37,15 +34,61 @@ st.session_state.setdefault("page", "Register")  # default page
 st.markdown('<div class="title">🌱 NextChapter</div>', unsafe_allow_html=True)
 st.caption("Your personal healing & reflection space")
 
-# -------- FORCE LOGIN / SIDEBAR --------
+# -------- SIDEBAR BUTTON STYLE & MENU --------
+st.markdown("""
+<style>
+/* Sidebar background */
+[data-testid="stSidebar"] { background-color: #1f2933; padding: 10px; }
+
+/* Sidebar buttons */
+.sidebar-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    border-radius: 10px;
+    background-color: #111827;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Hover effect */
+.sidebar-btn:hover { background-color: #4ade80; color: #111827; }
+
+/* Selected page highlight */
+.sidebar-btn.selected { background-color: #4ade80; color: #111827; }
+</style>
+""", unsafe_allow_html=True)
+
+# -------- SIDEBAR MENU --------
 if not st.session_state.logged_in:
-    page = st.sidebar.radio("Menu", ["Register", "Login"])
+    menu_items = ["Register", "Login"]
 else:
-    menu = ["Dashboard", "Add Journey", "Analyze", "Letters", "Breakup Timeline", "Gratitude", "Logout"]
+    menu_items = ["Dashboard", "Add Journey", "Analyze", "Letters",
+                  "Breakup Timeline", "Gratitude", "Logout"]
     if st.session_state.user_email == ADMIN_EMAIL:
-        menu.insert(3, "Admin")
-    page = st.sidebar.radio("Menu", menu)
-    st.session_state.page = page
+        menu_items.insert(3, "Admin")
+
+for item in menu_items:
+    selected_class = "selected" if st.session_state.get("page") == item else ""
+    if st.button(item, key=item):
+        st.session_state.page = item
+        st.rerun()
+    # Add our custom class to Streamlit button
+    st.markdown(f"""
+        <script>
+        const btns = window.parent.document.querySelectorAll('button[kind="primary"]');
+        btns.forEach(b => {{
+            if(b.innerText.includes('{item}')) b.classList.add('sidebar-btn','{selected_class}');
+        }});
+        </script>
+    """, unsafe_allow_html=True)
+
 
 # -------- REGISTER --------
 if page == "Register":
@@ -84,47 +127,48 @@ elif page == "Dashboard":
     st.subheader("🌿 Your Journey")
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("SELECT mood, note, created_at FROM journey WHERE user_email=? ORDER BY created_at DESC", (st.session_state.user_email,))
+    cur.execute(
+        "SELECT mood, note, is_private, created_at FROM journey WHERE user_email=? ORDER BY created_at DESC",
+        (st.session_state.user_email,)
+    )
     data = cur.fetchall()
     conn.close()
 
     if not data:
         st.info("No entries yet ✍️")
     else:
-        df = pd.DataFrame(data, columns=["mood","note","date"])
+        df = pd.DataFrame(data, columns=["mood","note","is_private","date"])
         df["date"] = pd.to_datetime(df["date"]).dt.date
-        mood_map = {"Sad 😔":1,"Low 😞":2,"Neutral 😐":3,"Positive 😊":4}
-        df["score"] = df["mood"].map(mood_map)
-        df_plot = df.iloc[::-1]
 
-        # Mood Graph
-        fig, ax = plt.subplots(figsize=(6,3))
-        ax.plot(df_plot["date"], df_plot["score"], marker="o", color="#4ade80", linewidth=2)
-        ax.set_ylim(0,5)
-        ax.set_yticks([1,2,3,4])
-        ax.set_yticklabels(["Sad 😔","Low 😞","Neutral 😐","Positive 😊"])
-        ax.set_title("🌿 Last 7 Days Mood", fontsize=16)
-        ax.grid(True, alpha=0.3)
-        st.pyplot(fig)
+        # Only public entries for chart/streak
+        df_public = df[df["is_private"]==0].copy()
+        if not df_public.empty:
+            mood_map = {"Sad 😔":1,"Low 😞":2,"Neutral 😐":3,"Positive 😊":4}
+            df_public["score"] = df_public["mood"].map(mood_map)
+            df_plot = df_public.iloc[::-1]
 
-        # Healing Progress
-        improvement = df["score"].iloc[-1] - df["score"].iloc[0]
-        if improvement>0: st.success(f"💪 You're improving! Mood +{improvement}")
-        elif improvement<0: st.warning(f"⚠️ Mood decreased {improvement}")
-        else: st.info("😐 Mood stable")
+            # Mood Chart
+            fig, ax = plt.subplots(figsize=(6,3))
+            ax.plot(df_plot["date"], df_plot["score"], marker="o", color="#4ade80", linewidth=2)
+            ax.set_ylim(0,5)
+            ax.set_yticks([1,2,3,4])
+            ax.set_yticklabels(["Sad 😔","Low 😞","Neutral 😐","Positive 😊"])
+            ax.set_title("🌿 Last 7 Days Mood", fontsize=16)
+            ax.grid(True, alpha=0.3)
+            st.pyplot(fig)
 
-        # Streak Tracker
-        df_dates = df["date"].drop_duplicates().sort_values(ascending=False)
-        streak = 1
-        for i in range(1,len(df_dates)):
-            if (df_dates.iloc[i-1]-df_dates.iloc[i]).days==1:
-                streak+=1
-            else:
-                break
-        st.info(f"🔥 Current Streak: {streak} day(s) in a row!")
+            # Streak Tracker
+            df_dates = df_public["date"].drop_duplicates().sort_values(ascending=False)
+            streak = 1
+            for i in range(1, len(df_dates)):
+                if (df_dates.iloc[i-1]-df_dates.iloc[i]).days==1:
+                    streak+=1
+                else:
+                    break
+            st.info(f"🔥 Current Streak: {streak} day(s) in a row!")
 
-        # AI Advice
-        last_note = df["note"].iloc[-1]
+        # AI Advice from last note
+        last_note = df["note"].iloc[0]  # include private note
         mood_result = analyze_sentiment(last_note)
         suggestion_map = {
             "Sad 😔":"Try a short walk or write 3 things you’re grateful for 🌸",
@@ -135,11 +179,12 @@ elif page == "Dashboard":
         st.markdown(f"**🤖 Mood:** {mood_result}")
         st.markdown(f"**💡 Suggestion:** {suggestion_map[mood_result]}")
 
-        # Entries List
-        for mood,note,date_val in data:
+        # All entries list
+        for mood,note,is_private,date_val in data:
+            private_tag = "🔐" if is_private else ""
             st.markdown(f"""
                 <div class="card">
-                    <b>{mood}</b><br>
+                    <b>{mood} {private_tag}</b><br>
                     <small>{date_val}</small>
                     <hr>
                     {note}
@@ -155,8 +200,10 @@ elif page == "Add Journey":
     if st.button("Save"):
         conn = get_connection()
         cur = conn.cursor()
-        cur.execute("INSERT INTO journey (user_email,mood,note,is_private) VALUES (?,?,?,?)",
-                    (st.session_state.user_email,mood,note,int(is_private)))
+        cur.execute(
+            "INSERT INTO journey (user_email,mood,note,is_private) VALUES (?,?,?,?)",
+            (st.session_state.user_email,mood,note,int(is_private))
+        )
         conn.commit()
         conn.close()
         st.success("Saved successfully 🌸")

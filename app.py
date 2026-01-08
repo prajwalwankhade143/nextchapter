@@ -34,6 +34,15 @@ st.session_state.setdefault("page", "Register")  # default page
 st.markdown('<div class="title">🌱 NextChapter</div>', unsafe_allow_html=True)
 st.caption("Your personal healing & reflection space")
 
+# -------- SIDEBAR --------
+if not st.session_state.logged_in:
+    page = st.sidebar.radio("Menu", ["Register", "Login"])
+else:
+    menu = ["Dashboard", "Add Journey", "Analyze", "Letters", "Breakup Timeline", "Gratitude", "Logout"]
+    if st.session_state.user_email == ADMIN_EMAIL:
+        menu.insert(3, "Admin")
+    page = st.sidebar.radio("Menu", menu)
+    st.session_state.page = page
 
 
 # -------- REGISTER --------

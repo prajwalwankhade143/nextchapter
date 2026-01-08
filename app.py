@@ -13,12 +13,9 @@ ADMIN_EMAIL = "prajwalwankhade202@gmail.com"
 st.set_page_config(page_title="NextChapter", layout="centered")
 st.markdown("""
 <style>
-/* Sidebar background */
 section[data-testid="stSidebar"] {
     background-color: #0b1220;
 }
-
-/* Sidebar button */
 .sidebar-btn {
     width: 100%;
     padding: 14px;
@@ -27,24 +24,15 @@ section[data-testid="stSidebar"] {
     background: linear-gradient(135deg, #2563eb, #3b82f6);
     color: white;
     font-weight: 700;
-    font-size: 15px;
     text-align: center;
-    cursor: pointer;
-    transition: all 0.25s ease-in-out;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
-
-.sidebar-btn:hover {
-    transform: scale(1.03);
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-}
-
 .sidebar-active {
     background: linear-gradient(135deg, #22c55e, #16a34a);
     color: #052e16;
 }
 </style>
 """, unsafe_allow_html=True)
+
 
 
 # ---------------- GLOBAL STYLE ----------------
@@ -68,6 +56,7 @@ input, textarea, select {
 """, unsafe_allow_html=True)
 
 # ---------------- SESSION ----------------
+# ---------------- SESSION ----------------
 st.session_state.setdefault("logged_in", False)
 st.session_state.setdefault("user_email", None)
 st.session_state.setdefault("page", "Login")
@@ -78,45 +67,34 @@ st.markdown('<div class="title">🌱 NextChapter</div>', unsafe_allow_html=True)
 st.caption("Your personal healing & reflection space")
 
 # ---------------- SIDEBAR ----------------
-def sidebar_btn(label, key):
-    active = st.session_state.get("page") == label
+with st.sidebar:
+    st.markdown("## 📍 Menu")
 
-    btn_style = """
-        width:100%;
-        padding:14px;
-        margin-bottom:10px;
-        border-radius:12px;
-        background:linear-gradient(135deg, #2563eb, #3b82f6);
-        color:white;
-        font-weight:700;
-        font-size:15px;
-        text-align:center;
-        box-shadow:0 4px 10px rgba(0,0,0,0.3);
-    """
+    def sidebar_btn(label):
+        active = st.session_state.page == label
+        css = "sidebar-btn sidebar-active" if active else "sidebar-btn"
 
-    if active:
-        btn_style = btn_style.replace(
-            "#2563eb, #3b82f6",
-            "#22c55e, #16a34a"
-        )
+        if st.button(label, use_container_width=True):
+            st.session_state.page = label
 
-    # DESIGN BUTTON (visible)
-    st.markdown(
-        f"<div style='{btn_style}'>{label}</div>",
-        unsafe_allow_html=True
-    )
+    if not st.session_state.logged_in:
+        sidebar_btn("Register")
+        sidebar_btn("Login")
+    else:
+        sidebar_btn("Dashboard")
+        sidebar_btn("Add Journey")
+        sidebar_btn("Analyze")
+        sidebar_btn("Letters")
+        sidebar_btn("Breakup Timeline")
+        sidebar_btn("Gratitude")
 
-    # REAL BUTTON (invisible but clickable)
-    clicked = st.button(
-        label,
-        key=key,
-        help=label,
-        use_container_width=True
-    )
+        if st.session_state.user_email == ADMIN_EMAIL:
+            sidebar_btn("Admin")
 
-    if clicked:
-        st.session_state.page = label
-        st.rerun()
+        sidebar_btn("Logout")
+
+    page = st.session_state.page
+
 
 
 # ---------------- REGISTER ----------------

@@ -1,4 +1,32 @@
 import streamlit as st
+st.markdown("""
+<style>
+/* Sidebar full width buttons */
+.sidebar-btn {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 10px;
+    text-align: center;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+}
+
+.sidebar-btn:hover {
+    background: linear-gradient(135deg, #2575fc, #6a11cb);
+    transform: scale(1.02);
+}
+
+/* Active button */
+.sidebar-active {
+    background: linear-gradient(135deg, #ff512f, #dd2476);
+}
+</style>
+""", unsafe_allow_html=True)
+
 from auth import register, login
 from db import get_connection
 from ai_model import analyze_sentiment
@@ -72,35 +100,41 @@ st.caption("Your personal healing & reflection space")
 
 # -------- SIDEBAR MENU --------
 with st.sidebar:
-    st.markdown("### 📍 Navigation")
+    st.markdown("## 📍 Menu")
 
-    if not st.session_state.logged_in:
-        page = st.radio(
-            "",
-            ["Register", "Login"],
-            label_visibility="collapsed"
+    def sidebar_button(label, key):
+        active = st.session_state.get("page") == label
+        btn_class = "sidebar-btn sidebar-active" if active else "sidebar-btn"
+
+        clicked = st.markdown(
+            f"<div class='{btn_class}'>{label}</div>",
+            unsafe_allow_html=True
         )
+
+        if st.button(label, key=key, use_container_width=True):
+            st.session_state.page = label
+
+    # -------- NOT LOGGED IN --------
+    if not st.session_state.logged_in:
+        sidebar_button("Register", "reg")
+        sidebar_button("Login", "login")
+
+    # -------- LOGGED IN --------
     else:
-        menu = [
-            "Dashboard",
-            "Add Journey",
-            "Analyze",
-            "Letters",
-            "Breakup Timeline",
-            "Gratitude",
-            "Logout"
-        ]
+        sidebar_button("Dashboard", "dash")
+        sidebar_button("Add Journey", "add")
+        sidebar_button("Analyze", "ana")
+        sidebar_button("Letters", "let")
+        sidebar_button("Breakup Timeline", "time")
+        sidebar_button("Gratitude", "grat")
 
         if st.session_state.user_email == ADMIN_EMAIL:
-            menu.insert(3, "Admin")
+            sidebar_button("Admin", "admin")
 
-        page = st.radio(
-            "",
-            menu,
-            label_visibility="collapsed"
-        )
+        sidebar_button("Logout", "logout")
 
-    st.session_state.page = page
+    page = st.session_state.get("page", "Login")
+
 
 
 

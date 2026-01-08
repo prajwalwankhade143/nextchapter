@@ -2,22 +2,21 @@ import streamlit as st
 st.markdown(
     """
     <style>
-    /* Text color fix for white containers */
-    div[data-testid="stContainer"] *,
-    div[data-testid="stMarkdown"] *,
-    div[data-testid="stText"] {
-        color: #111111 !important;
+    /* Fix input text visibility only */
+    input, textarea, select {
+        color: #000000 !important;
+        background-color: #ffffff !important;
     }
 
-    /* Input boxes text */
-    textarea, input, select {
-        color: #111111 !important;
-        background-color: #ffffff !important;
+    /* Fix labels */
+    label, .stTextLabel {
+        color: #ffffff !important;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
+
 
 from auth import register, login
 from db import get_connection

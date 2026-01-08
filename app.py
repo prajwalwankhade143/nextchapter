@@ -100,7 +100,10 @@ if page == "Login":
     st.markdown('</div>', unsafe_allow_html=True)
 
 # -------- DASHBOARD --------
+# -------- DASHBOARD --------
 if page == "Dashboard":
+    import pandas as pd
+    import matplotlib.pyplot as plt
     st.subheader("🌿 Your Journey")
 
     conn = get_connection()
@@ -115,6 +118,58 @@ if page == "Dashboard":
     if not data:
         st.info("No entries yet ✍️")
     else:
+        # -------- Mood Graph & Healing Progress --------
+        df = pd.DataFrame(data, columns=["mood", "note", "date"])
+        df["date"] = pd.to_datetime(df["date"]).dt.date
+
+        mood_map = {"Sad 😔": 1, "Low 😞": 2, "Neutral 😐": 3, "Positive 😊": 4}
+        df["score"] = df["mood"].map(mood_map)
+
+        df_plot = df.iloc[::-1]  # oldest first
+
+        # Matplotlib Chart
+        fig, ax = plt.subplots(figsize=(6,3))
+        ax.plot(df_plot["date"], df_plot["score"], marker="o", color="#4ade80", linewidth=2)
+        ax.set_ylim(0,5)
+        ax.set_yticks([1,2,3,4])
+        ax.set_yticklabels(["Sad 😔","Low 😞","Neutral 😐","Positive 😊"])
+        ax.set_title("🌿 Last 7 Days Mood", fontsize=16)
+        ax.grid(True, alpha=0.3)
+        st.pyplot(fig)
+
+        # Healing Progress
+        improvement = df["score"].iloc[-1] - df["score"].iloc[0]
+        if improvement > 0:
+            st.success(f"💪 You're improving! Mood +{improvement}")
+        elif improvement < 0:
+            st.warning(f"⚠️ Mood decreased {improvement}")
+        else:
+            st.info("😐 Mood stable")
+
+        # -------- Streak Tracker --------
+        df_dates = df["date"].drop_duplicates().sort_values(ascending=False)
+        streak = 1
+        for i in range(1, len(df_dates)):
+            if (df_dates.iloc[i-1] - df_dates.iloc[i]).days == 1:
+                streak += 1
+            else:
+                break
+        st.info(f"🔥 Current Streak: {streak} day(s) in a row!")
+
+        # -------- AI Advice / Coping --------
+        last_note = df["note"].iloc[-1]
+        from ai_model import analyze_sentiment
+        mood_result = analyze_sentiment(last_note)
+        suggestion_map = {
+            "Sad 😔": "Try a short walk or write 3 things you’re grateful for 🌸",
+            "Low 😞": "Take 5 deep breaths or listen to calming music 🎧",
+            "Neutral 😐": "Keep journaling daily, small steps matter ✍️",
+            "Positive 😊": "Great! Share your joy with someone today 🌟"
+        }
+        st.markdown(f"**🤖 Mood:** {mood_result}")
+        st.markdown(f"**💡 Suggestion:** {suggestion_map[mood_result]}")
+
+        # -------- List of Entries --------
         for mood, note, date in data:
             st.markdown(
                 f"""
@@ -128,27 +183,30 @@ if page == "Dashboard":
                 unsafe_allow_html=True
             )
 
-# -------- ADD JOURNEY --------
-if page == "Add Journey":
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.subheader("📝 Add Today’s Feelings")
-    mood = st.selectbox(
-        "Mood",
-        ["Sad 😔", "Low 😞", "Neutral 😐", "Positive 😊"]
-    )
-    note = st.text_area("Your thoughts")
 
-    if st.button("Save"):
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute(
-            "INSERT INTO journey (user_email, mood, note) VALUES (?, ?, ?)",
-            (st.session_state.user_email, mood, note)
-        )
-        conn.commit()
-        conn.close()
-        st.success("Saved successfully 🌸")
-    st.markdown('</div>', unsafe_allow_html=True)
+# -------- ADD JOURNEY --------
+st.subheader("📝 Add Today’s Feelings")
+mood = st.selectbox(
+    "Mood",
+    ["Sad 😔", "Low 😞", "Neutral 😐", "Positive 😊"]
+)
+note = st.text_area("Your thoughts")
+
+# ✅ Private Entry Checkbox
+is_private = st.checkbox("Make this entry private 🔐")
+
+if st.button("Save"):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO journey (user_email, mood, note, is_private) VALUES (?, ?, ?, ?)",
+        (st.session_state.user_email, mood, note, int(is_private))
+    )
+    conn.commit()
+    conn.close()
+    st.success("Saved successfully 🌸")
+
+
 
 # -------- ANALYZE --------
 if page == "Analyze":

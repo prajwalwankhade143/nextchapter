@@ -99,12 +99,22 @@ with st.sidebar:
 
 # ---------------- REGISTER ----------------
 if page == "Register":
+    st.markdown('<div class="card">', unsafe_allow_html=True)
     st.subheader("Create Account")
+    
     name = st.text_input("Name")
     email = st.text_input("Email")
     password = st.text_input("Password", type="password")
+    
     if st.button("Register"):
-        st.success("Registered ✅") if register(name,email,password) else st.error("Already exists ❌")
+        # Proper if-else block to avoid DeltaGenerator object print
+        if register(name, email, password):
+            st.success("Registered ✅")
+        else:
+            st.error("Already exists ❌")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+
 
 # ---------------- LOGIN ----------------
 elif page == "Login":

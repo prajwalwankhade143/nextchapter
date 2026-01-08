@@ -70,41 +70,53 @@ input, textarea, select {
 # ---------------- SESSION ----------------
 st.session_state.setdefault("logged_in", False)
 st.session_state.setdefault("user_email", None)
+st.session_state.setdefault("page", "Login")
+
 
 # ---------------- HEADER ----------------
 st.markdown('<div class="title">🌱 NextChapter</div>', unsafe_allow_html=True)
 st.caption("Your personal healing & reflection space")
 
 # ---------------- SIDEBAR ----------------
-with st.sidebar:
-    st.markdown("## 📍 Menu")
+def sidebar_btn(label, key):
+    active = st.session_state.get("page") == label
 
-    def sidebar_btn(label, key):
-        active = st.session_state.get("page") == label
-        css = "sidebar-btn sidebar-active" if active else "sidebar-btn"
+    btn_style = """
+        width:100%;
+        padding:14px;
+        margin-bottom:10px;
+        border-radius:12px;
+        background:linear-gradient(135deg, #2563eb, #3b82f6);
+        color:white;
+        font-weight:700;
+        font-size:15px;
+        text-align:center;
+        box-shadow:0 4px 10px rgba(0,0,0,0.3);
+    """
 
-        st.markdown(f"<div class='{css}'>{label}</div>", unsafe_allow_html=True)
+    if active:
+        btn_style = btn_style.replace(
+            "#2563eb, #3b82f6",
+            "#22c55e, #16a34a"
+        )
 
-        if st.button(label, key=key, use_container_width=True):
-            st.session_state.page = label
+    # DESIGN BUTTON (visible)
+    st.markdown(
+        f"<div style='{btn_style}'>{label}</div>",
+        unsafe_allow_html=True
+    )
 
-    if not st.session_state.logged_in:
-        sidebar_btn("Register", "reg")
-        sidebar_btn("Login", "login")
-    else:
-        sidebar_btn("Dashboard", "dash")
-        sidebar_btn("Add Journey", "add")
-        sidebar_btn("Analyze", "ana")
-        sidebar_btn("Letters", "let")
-        sidebar_btn("Breakup Timeline", "time")
-        sidebar_btn("Gratitude", "grat")
+    # REAL BUTTON (invisible but clickable)
+    clicked = st.button(
+        label,
+        key=key,
+        help=label,
+        use_container_width=True
+    )
 
-        if st.session_state.user_email == ADMIN_EMAIL:
-            sidebar_btn("Admin", "admin")
-
-        sidebar_btn("Logout", "logout")
-
-    page = st.session_state.get("page", "Login")
+    if clicked:
+        st.session_state.page = label
+        st.rerun()
 
 
 # ---------------- REGISTER ----------------

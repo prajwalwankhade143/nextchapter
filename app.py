@@ -88,6 +88,7 @@ with st.sidebar:
 
     def sidebar_btn(label):
         active = st.session_state.page == label
+        btn_class = "sidebar-btn sidebar-active" if active else "sidebar-btn"
         if st.button(label, use_container_width=True):
             st.session_state.page = label
 
@@ -101,66 +102,36 @@ with st.sidebar:
         sidebar_btn("Letters")
         sidebar_btn("Breakup Timeline")
         sidebar_btn("Gratitude")
-
         if st.session_state.user_email == ADMIN_EMAIL:
             sidebar_btn("Admin")
-
         sidebar_btn("Logout")
 
     page = st.session_state.page
     st.markdown("---")
-st.markdown("### 🤖 AI Companion")
 
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
+    # ===== AI COMPANION IN SIDEBAR =====
+    st.markdown("### 🤖 AI Companion")
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
 
-with st.container():
     user_msg = st.text_area(
         "Talk to your AI 🧠",
-        placeholder="Type here...",
+        placeholder="I'm feeling low today...",
         height=80,
-        key="chat_input"
+        key="chat_sidebar_input"  # <- unique key
     )
 
-    if st.button("Send 💬", use_container_width=True):
+    if st.button("Send 💬", key="send_sidebar", use_container_width=True):
         if user_msg:
             ai_reply = analyze_sentiment(user_msg)
             st.session_state.chat_history.append(("You", user_msg))
             st.session_state.chat_history.append(("AI", ai_reply))
 
-    for sender, msg in reversed(st.session_state.chat_history[-4:]):
+    for sender, msg in reversed(st.session_state.chat_history[-6:]):
         if sender == "You":
             st.markdown(f"🧑 **You:** {msg}")
         else:
             st.markdown(f"🤖 **AI:** {msg}")
-
-
-    # ===============================
-# 🤖 AI CHATBOT (GLOBAL SIDEBAR)
-# ===============================
-st.markdown("---")
-st.markdown("### 🤖 AI Companion")
-
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
-
-user_msg = st.text_input(
-    "Talk to your AI 🧠",
-    placeholder="I'm feeling low today...",
-    key="chat_input"
-)
-
-if st.button("Send 💬", use_container_width=True):
-    if user_msg:
-        ai_reply = analyze_sentiment(user_msg)
-        st.session_state.chat_history.append(("You", user_msg))
-        st.session_state.chat_history.append(("AI", ai_reply))
-
-for sender, msg in reversed(st.session_state.chat_history[-6:]):
-    if sender == "You":
-        st.markdown(f"🧑 **You:** {msg}")
-    else:
-        st.markdown(f"🤖 **AI:** {msg}")
 
 
 # ---------------- REGISTER ----------------

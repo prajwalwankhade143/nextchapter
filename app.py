@@ -83,6 +83,12 @@ st.markdown('<div class="title">🌱 NextChapter</div>', unsafe_allow_html=True)
 st.caption("Your personal healing & reflection space")
 
 # ---------------- SIDEBAR ----------------
+import openai
+import os
+
+# ===============================
+# Sidebar Menu
+# ===============================
 with st.sidebar:
     st.markdown("## 📍 Menu")
 
@@ -108,28 +114,42 @@ with st.sidebar:
     page = st.session_state.page
     st.markdown("---")
 
-    # 🌟 Sidebar AI Companion (ChatGPT-style) — only for logged-in users
+    # ===============================
+    # 🌟 Sidebar AI Companion (GPT-powered)
+    # ===============================
     if st.session_state.logged_in:
         st.markdown("### 🤖 AI Companion")
 
+        # Initialize chat history
         if "chat_history" not in st.session_state:
             st.session_state.chat_history = []
 
-        # Function to generate AI response (replace with real GPT/Gemini API)
+        # -------------------------------
+        # GPT API Function
+        # -------------------------------
         def generate_ai_response(user_input):
-            mood_reply_map = {
-                "sad": "I'm here for you. Take a deep breath 🌸",
-                "low": "It's okay to feel low. Maybe go for a short walk 🏞️",
-                "neutral": "Keep journaling and take small steps ✍️",
-                "positive": "That's great! Share your joy with someone 🌟"
-            }
-            user_lower = user_input.lower()
-            for key in mood_reply_map:
-                if key in user_lower:
-                    return mood_reply_map[key]
-            return "Thanks for sharing! Tell me more about how you're feeling."
+            openai.api_key = os.getenv("OPENAI_API_KEY")  # or use st.secrets["OPENAI_API_KEY"]
+            try:
+                response = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": "You are a helpful, friendly mental wellness assistant."},
+                        *[
+                            {"role": "user" if sender=="You" else "assistant", "content": msg} 
+                            for sender, msg in reversed(st.session_state.chat_history[-6:])
+                        ],
+                        {"role": "user", "content": user_input}
+                    ],
+                    max_tokens=150,
+                    temperature=0.7
+                )
+                return response.choices[0].message.content.strip()
+            except Exception as e:
+                return "❌ AI Error: " + str(e)
 
-        # Chat input
+        # -------------------------------
+        # Chat Input
+        # -------------------------------
         user_msg = st.text_input(
             "Talk to your AI 🧠",
             placeholder="Type your message here...",
@@ -137,15 +157,19 @@ with st.sidebar:
             label_visibility="collapsed"
         )
 
-        # Send button
+        # -------------------------------
+        # Send Button
+        # -------------------------------
         if st.button("Send 💬", use_container_width=True):
             if user_msg.strip():
-                st.session_state.chat_history.append(("You", user_msg))
-                ai_reply = generate_ai_response(user_msg)
-                st.session_state.chat_history.append(("AI", ai_reply))
+                # Insert newest messages at the start
+                st.session_state.chat_history.insert(0, ("AI", generate_ai_response(user_msg)))
+                st.session_state.chat_history.insert(0, ("You", user_msg))
 
-        # Display last 6 messages, newest first
-        for sender, msg in reversed(st.session_state.chat_history[-6:]):
+        # -------------------------------
+        # Display messages (newest first)
+        # -------------------------------
+        for sender, msg in st.session_state.chat_history:
             if sender == "You":
                 st.markdown(
                     f"<div style='background:#e5e7eb;color:#0f172a;padding:8px;border-radius:8px;margin-bottom:4px;'>🧑 <b>You:</b> {msg}</div>",

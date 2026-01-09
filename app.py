@@ -109,57 +109,56 @@ with st.sidebar:
     page = st.session_state.page
     st.markdown("---")
 
-   # ===============================
-# 🌟 Sidebar AI Companion (ChatGPT-style)
-# ===============================
-st.markdown("---")
-st.markdown("### 🤖 AI Companion")
+    # ===============================
+    # 🌟 Sidebar AI Companion (ChatGPT-style)
+    # ===============================
+    st.markdown("### 🤖 AI Companion")
 
-# Initialize chat history if not present
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
+    # Initialize chat history if not present
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
 
-# Function to generate AI response (replace with OpenAI/Gemini API)
-def generate_ai_response(user_input):
-    # Placeholder logic
-    # Replace this with GPT API call for real-world AI responses
-    mood_reply_map = {
-        "sad": "I'm here for you. Take a deep breath 🌸",
-        "low": "It's okay to feel low. Maybe go for a short walk 🏞️",
-        "neutral": "Keep journaling and take small steps ✍️",
-        "positive": "That's great! Share your joy with someone 🌟"
-    }
-    # Simple keyword check (demo)
-    user_lower = user_input.lower()
-    for key in mood_reply_map:
-        if key in user_lower:
-            return mood_reply_map[key]
-    return "Thanks for sharing! Tell me more about how you're feeling."
+    # Function to generate AI response (replace with real GPT/Gemini API)
+    def generate_ai_response(user_input):
+        mood_reply_map = {
+            "sad": "I'm here for you. Take a deep breath 🌸",
+            "low": "It's okay to feel low. Maybe go for a short walk 🏞️",
+            "neutral": "Keep journaling and take small steps ✍️",
+            "positive": "That's great! Share your joy with someone 🌟"
+        }
+        user_lower = user_input.lower()
+        for key in mood_reply_map:
+            if key in user_lower:
+                return mood_reply_map[key]
+        return "Thanks for sharing! Tell me more about how you're feeling."
 
-# Chat input
-user_msg = st.text_input(
-    "Talk to your AI 🧠",
-    placeholder="Type your message here...",
-    key="ai_chat_input",
-    label_visibility="collapsed"
-)
+    # Chat input
+    user_msg = st.text_input(
+        "Talk to your AI 🧠",
+        placeholder="Type your message here...",
+        key="ai_chat_input",
+        label_visibility="collapsed"
+    )
 
-# Send button
-if st.button("Send 💬", use_container_width=True):
-    if user_msg.strip():
-        # Append user message
-        st.session_state.chat_history.append(("You", user_msg))
-        # Get AI response
-        ai_reply = generate_ai_response(user_msg)
-        st.session_state.chat_history.append(("AI", ai_reply))
+    # Send button
+    if st.button("Send 💬", use_container_width=True):
+        if user_msg.strip():
+            st.session_state.chat_history.append(("You", user_msg))
+            ai_reply = generate_ai_response(user_msg)
+            st.session_state.chat_history.append(("AI", ai_reply))
 
-# Display last 6 messages
-for sender, msg in st.session_state.chat_history[-6:]:
-    if sender == "You":
-        st.markdown(f"<div style='background:#e5e7eb;color:#0f172a;padding:8px;border-radius:8px;margin-bottom:4px;'>🧑 <b>You:</b> {msg}</div>", unsafe_allow_html=True)
-    else:
-        st.markdown(f"<div style='background:#2563eb;color:#ffffff;padding:8px;border-radius:8px;margin-bottom:4px;'>🤖 <b>AI:</b> {msg}</div>", unsafe_allow_html=True)
-
+    # Display last 6 messages
+    for sender, msg in st.session_state.chat_history[-6:]:
+        if sender == "You":
+            st.markdown(
+                f"<div style='background:#1f2933;color:#e5e7eb;padding:8px;border-radius:8px;margin-bottom:4px;'>🧑 <b>You:</b> {msg}</div>",
+                unsafe_allow_html=True
+            )
+        else:
+            st.markdown(
+                f"<div style='background:#2563eb;color:#ffffff;padding:8px;border-radius:8px;margin-bottom:4px;'>🤖 <b>AI:</b> {msg}</div>",
+                unsafe_allow_html=True
+            )
 
 # ---------------- REGISTER ----------------
 if page == "Register":

@@ -181,7 +181,6 @@ with st.sidebar:
                     unsafe_allow_html=True
                 )
 
-
 # ---------------- REGISTER ----------------
 if page == "Register":
     st.markdown('<div class="card">', unsafe_allow_html=True)

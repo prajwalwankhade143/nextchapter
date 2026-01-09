@@ -130,14 +130,12 @@ with st.sidebar:
             st.session_state.chat_history = []
 
         # -------------------------------
-        # GPT API Function (OpenAI 1.x)
+        # GPT API Function
         # -------------------------------
         def generate_ai_response(user_input):
+            # Use Streamlit secrets for API key
+            openai.api_key = st.secrets["openai"]["api_key"]
             try:
-                # Set API key (ensure OPENAI_API_KEY is set in environment or secrets)
-                openai.api_key = os.getenv("OPENAI_API_KEY")  # or st.secrets["OPENAI_API_KEY"]
-                
-                # Call GPT
                 response = openai.chat.completions.create(
                     model="gpt-3.5-turbo",
                     messages=[

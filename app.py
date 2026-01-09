@@ -91,6 +91,9 @@ import openai
 import os
 import streamlit as st
 
+# ===============================
+# Sidebar Menu
+# ===============================
 with st.sidebar:
     st.markdown("## 📍 Menu")
 
@@ -122,17 +125,20 @@ with st.sidebar:
     if st.session_state.logged_in:
         st.markdown("### 🤖 AI Companion")
 
+        # Initialize chat history
         if "chat_history" not in st.session_state:
             st.session_state.chat_history = []
 
-        # GPT API Function
+        # -------------------------------
+        # GPT API Function (latest 1.x)
+        # -------------------------------
         def generate_ai_response(user_input):
-            openai.api_key = os.getenv("OPENAI_API_KEY")
+            openai.api_key = os.getenv("OPENAI_API_KEY")  # or st.secrets["OPENAI_API_KEY"]
             try:
-                response = openai.ChatCompletion.create(
+                response = openai.chat.completions.create(
                     model="gpt-3.5-turbo",
                     messages=[
-                        {"role": "system", "content": "You are a helpful, friendly mental wellness assistant."},
+                        {"role": "system", "content": "You are a friendly mental wellness assistant."},
                         *[
                             {"role": "user" if sender=="You" else "assistant", "content": msg} 
                             for sender, msg in reversed(st.session_state.chat_history[-6:])
@@ -142,11 +148,13 @@ with st.sidebar:
                     max_tokens=150,
                     temperature=0.7
                 )
-                return response.choices[0].message.content.strip()
+                return response.choices[0].message["content"].strip()
             except Exception as e:
                 return "❌ AI Error: " + str(e)
 
+        # -------------------------------
         # Chat Input
+        # -------------------------------
         user_msg = st.text_input(
             "Talk to your AI 🧠",
             placeholder="Type your message here...",
@@ -154,14 +162,18 @@ with st.sidebar:
             label_visibility="collapsed"
         )
 
+        # -------------------------------
         # Send Button
+        # -------------------------------
         if st.button("Send 💬", use_container_width=True):
             if user_msg.strip():
-                # Insert newest messages at the start
+                # Insert newest messages at the top
                 st.session_state.chat_history.insert(0, ("AI", generate_ai_response(user_msg)))
                 st.session_state.chat_history.insert(0, ("You", user_msg))
 
+        # -------------------------------
         # Display messages (newest first)
+        # -------------------------------
         for sender, msg in st.session_state.chat_history:
             if sender == "You":
                 st.markdown(

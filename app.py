@@ -87,8 +87,6 @@ st.markdown('<div class="title">🌱 NextChapter</div>', unsafe_allow_html=True)
 st.caption("Your personal healing & reflection space")
 
 # ---------------- SIDEBAR ----------------
-import openai
-import os
 import streamlit as st
 
 # ===============================
@@ -112,7 +110,7 @@ with st.sidebar:
         sidebar_btn("Letters")
         sidebar_btn("Breakup Timeline")
         sidebar_btn("Gratitude")
-        if st.session_state.user_email == ADMIN_EMAIL:
+        if st.session_state.user_email == "admin@example.com":  # Replace with your admin email
             sidebar_btn("Admin")
         sidebar_btn("Logout")
 
@@ -120,7 +118,7 @@ with st.sidebar:
     st.markdown("---")
 
     # ===============================
-    # 🌟 Sidebar AI Companion (GPT-powered)
+    # 🌟 Sidebar AI Companion (Mock AI for demo)
     # ===============================
     if st.session_state.logged_in:
         st.markdown("### 🤖 AI Companion")
@@ -130,28 +128,20 @@ with st.sidebar:
             st.session_state.chat_history = []
 
         # -------------------------------
-        # GPT API Function
+        # Mock AI Function
         # -------------------------------
         def generate_ai_response(user_input):
-            # Use Streamlit secrets for API key
-            openai.api_key = st.secrets["openai"]["api_key"]
-            try:
-                response = openai.chat.completions.create(
-                    model="gpt-3.5-turbo",
-                    messages=[
-                        {"role": "system", "content": "You are a friendly mental wellness assistant."},
-                        *[
-                            {"role": "user" if sender=="You" else "assistant", "content": msg} 
-                            for sender, msg in reversed(st.session_state.chat_history[-6:])
-                        ],
-                        {"role": "user", "content": user_input}
-                    ],
-                    max_tokens=150,
-                    temperature=0.7
-                )
-                return response.choices[0].message["content"].strip()
-            except Exception as e:
-                return "❌ AI Error: " + str(e)
+            mood_reply_map = {
+                "sad": "I'm here for you 🌸",
+                "low": "Take a short walk 🏞️",
+                "neutral": "Keep journaling ✍️",
+                "positive": "Great! Share your joy 🌟"
+            }
+            user_lower = user_input.lower()
+            for key in mood_reply_map:
+                if key in user_lower:
+                    return mood_reply_map[key]
+            return "Thanks for sharing! Tell me more about your feelings."
 
         # -------------------------------
         # Chat Input

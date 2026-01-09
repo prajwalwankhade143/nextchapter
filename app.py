@@ -148,17 +148,14 @@ with st.sidebar:
             st.session_state.chat_history.append(("AI", ai_reply))
 
     # Display last 6 messages
-    for sender, msg in st.session_state.chat_history[-6:]:
-        if sender == "You":
-            st.markdown(
-                f"<div style='background:#1f2933;color:#e5e7eb;padding:8px;border-radius:8px;margin-bottom:4px;'>🧑 <b>You:</b> {msg}</div>",
-                unsafe_allow_html=True
-            )
-        else:
-            st.markdown(
-                f"<div style='background:#2563eb;color:#ffffff;padding:8px;border-radius:8px;margin-bottom:4px;'>🤖 <b>AI:</b> {msg}</div>",
-                unsafe_allow_html=True
-            )
+    # Display last 6 messages, newest first
+for sender, msg in reversed(st.session_state.chat_history[-6:]):
+    if sender == "You":
+        st.markdown(f"<div style='background:#e5e7eb;color:#0f172a;padding:8px;border-radius:8px;margin-bottom:4px;'>🧑 <b>You:</b> {msg}</div>", 
+                    unsafe_allow_html=True)
+    else:
+        st.markdown(f"<div style='background:#2563eb;color:#ffffff;padding:8px;border-radius:8px;margin-bottom:4px;'>🤖 <b>AI:</b> {msg}</div>",
+                     unsafe_allow_html=True)
 
 # ---------------- REGISTER ----------------
 if page == "Register":

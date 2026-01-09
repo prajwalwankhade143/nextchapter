@@ -1,4 +1,8 @@
 
+import os
+import openai
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
 import streamlit as st
 from auth import register, login
 from db import get_connection
@@ -85,10 +89,8 @@ st.caption("Your personal healing & reflection space")
 # ---------------- SIDEBAR ----------------
 import openai
 import os
+import streamlit as st
 
-# ===============================
-# Sidebar Menu
-# ===============================
 with st.sidebar:
     st.markdown("## 📍 Menu")
 
@@ -120,15 +122,12 @@ with st.sidebar:
     if st.session_state.logged_in:
         st.markdown("### 🤖 AI Companion")
 
-        # Initialize chat history
         if "chat_history" not in st.session_state:
             st.session_state.chat_history = []
 
-        # -------------------------------
         # GPT API Function
-        # -------------------------------
         def generate_ai_response(user_input):
-            openai.api_key = os.getenv("OPENAI_API_KEY")  # or use st.secrets["OPENAI_API_KEY"]
+            openai.api_key = os.getenv("OPENAI_API_KEY")
             try:
                 response = openai.ChatCompletion.create(
                     model="gpt-3.5-turbo",
@@ -147,9 +146,7 @@ with st.sidebar:
             except Exception as e:
                 return "❌ AI Error: " + str(e)
 
-        # -------------------------------
         # Chat Input
-        # -------------------------------
         user_msg = st.text_input(
             "Talk to your AI 🧠",
             placeholder="Type your message here...",
@@ -157,18 +154,14 @@ with st.sidebar:
             label_visibility="collapsed"
         )
 
-        # -------------------------------
         # Send Button
-        # -------------------------------
         if st.button("Send 💬", use_container_width=True):
             if user_msg.strip():
                 # Insert newest messages at the start
                 st.session_state.chat_history.insert(0, ("AI", generate_ai_response(user_msg)))
                 st.session_state.chat_history.insert(0, ("You", user_msg))
 
-        # -------------------------------
         # Display messages (newest first)
-        # -------------------------------
         for sender, msg in st.session_state.chat_history:
             if sender == "You":
                 st.markdown(
@@ -180,6 +173,7 @@ with st.sidebar:
                     f"<div style='background:#2563eb;color:#ffffff;padding:8px;border-radius:8px;margin-bottom:4px;'>🤖 <b>AI:</b> {msg}</div>",
                     unsafe_allow_html=True
                 )
+
 
 # ---------------- REGISTER ----------------
 if page == "Register":

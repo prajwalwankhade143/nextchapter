@@ -110,32 +110,31 @@ with st.sidebar:
     page = st.session_state.page
 
     # ===============================
-    # 🤖 AI CHATBOT (GLOBAL SIDEBAR)
-    # ===============================
-    st.markdown("---")
-    st.markdown("### 🤖 AI Companion")
+# 🤖 AI CHATBOT (GLOBAL SIDEBAR)
+# ===============================
+st.markdown("---")
+st.markdown("### 🤖 AI Companion")
 
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = []
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
 
-    user_msg = st.text_input(
-        "Talk to your AI 🧠",
-        placeholder="I'm feeling low today...",
-        key="chat_input"
-    )
+user_msg = st.text_input(
+    "Talk to your AI 🧠",
+    placeholder="I'm feeling low today...",
+    key="chat_input"
+)
 
-    if st.button("Send 💬", use_container_width=True):
-        if user_msg:
-            ai_reply = analyze_sentiment(user_msg)
-            st.session_state.chat_history.append(("You", user_msg))
-            st.session_state.chat_history.append(("AI", ai_reply))
-            st.session_state.chat_input = ""
+if st.button("Send 💬", use_container_width=True):
+    if user_msg:
+        ai_reply = analyze_sentiment(user_msg)
+        st.session_state.chat_history.append(("You", user_msg))
+        st.session_state.chat_history.append(("AI", ai_reply))
 
-    for sender, msg in reversed(st.session_state.chat_history[-6:]):
-        if sender == "You":
-            st.markdown(f"🧑 **You:** {msg}")
-        else:
-            st.markdown(f"🤖 **AI:** {msg}")
+for sender, msg in reversed(st.session_state.chat_history[-6:]):
+    if sender == "You":
+        st.markdown(f"🧑 **You:** {msg}")
+    else:
+        st.markdown(f"🤖 **AI:** {msg}")
 
 
 # ---------------- REGISTER ----------------

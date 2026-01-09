@@ -6,20 +6,23 @@ from ai_model import analyze_sentiment
 import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import date, timedelta
-def mood_chatbot(user_msg):
+# ---------- AI CHATBOT MEMORY ----------
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+
+def ai_reply(user_msg):
     msg = user_msg.lower()
 
-    if "sad" in msg or "depressed" in msg or "low" in msg:
-        return "I'm really sorry you're feeling this way 😔. Want to tell me what happened today?"
-    elif "stress" in msg or "anxious" in msg or "anxiety" in msg:
-        return "That sounds stressful 😟. Try slow breathing: inhale 4 sec, hold 4 sec, exhale 6 sec."
-    elif "happy" in msg or "good" in msg:
-        return "That's great to hear! 😊 What made your day better?"
-    elif "alone" in msg or "lonely" in msg:
-        return "You are not alone 🤍. I'm here with you. Want to talk more?"
+    if any(x in msg for x in ["sad","low","depressed","cry"]):
+        return "I’m here for you 🤍. Try writing your feelings or take a short walk 🌱"
+    elif any(x in msg for x in ["happy","good","great","positive"]):
+        return "That’s wonderful 🌟 Keep doing what makes you happy!"
+    elif "sleep" in msg:
+        return "Good sleep matters 💤 Try avoiding phone before bed."
+    elif "motivate" in msg:
+        return "You’re stronger than you think 💪 One step at a time."
     else:
-        return "I’m listening 🤖. Tell me more about how you’re feeling."
-
+        return "Tell me more 🙂 I’m listening."
 
 # ---------------- CONFIG ----------------
 ADMIN_EMAIL = "prajwalwankhade202@gmail.com"
@@ -85,8 +88,6 @@ with st.sidebar:
 
     def sidebar_btn(label):
         active = st.session_state.page == label
-        css = "sidebar-btn sidebar-active" if active else "sidebar-btn"
-
         if st.button(label, use_container_width=True):
             st.session_state.page = label
 
@@ -108,6 +109,33 @@ with st.sidebar:
 
     page = st.session_state.page
 
+    # ===============================
+    # 🤖 AI CHATBOT (GLOBAL SIDEBAR)
+    # ===============================
+    st.markdown("---")
+    st.markdown("### 🤖 AI Companion")
+
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+
+    user_msg = st.text_input(
+        "Talk to your AI 🧠",
+        placeholder="I'm feeling low today...",
+        key="chat_input"
+    )
+
+    if st.button("Send 💬", use_container_width=True):
+        if user_msg:
+            ai_reply = analyze_sentiment(user_msg)
+            st.session_state.chat_history.append(("You", user_msg))
+            st.session_state.chat_history.append(("AI", ai_reply))
+            st.session_state.chat_input = ""
+
+    for sender, msg in reversed(st.session_state.chat_history[-6:]):
+        if sender == "You":
+            st.markdown(f"🧑 **You:** {msg}")
+        else:
+            st.markdown(f"🤖 **AI:** {msg}")
 
 
 # ---------------- REGISTER ----------------

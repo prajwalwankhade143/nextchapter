@@ -163,45 +163,76 @@ elif page == "Dashboard":
         df = pd.DataFrame(data, columns=["mood","note","private","date"])
         df["date"] = pd.to_datetime(df["date"]).dt.date
 
+        # -------- FILTER LAST 7 DAYS PUBLIC --------
         dfp = df[(df["private"]==0) & (df["date"]>=date.today()-timedelta(days=6))]
         score_map = {"Sad 😔":1,"Low 😞":2,"Neutral 😐":3,"Positive 😊":4}
 
+        # -------- LINE CHART: MOOD TREND --------
         if not dfp.empty:
             dfp["score"] = dfp["mood"].map(score_map)
             fig, ax = plt.subplots(figsize=(7,3))
-            ax.plot(dfp["date"], dfp["score"], marker="o", linewidth=2)
+            ax.plot(dfp["date"], dfp["score"], marker="o", linewidth=2, color="#4ade80")
             ax.set_yticks([1,2,3,4])
             ax.set_yticklabels(score_map.keys())
             ax.set_title("🌿 Last 7 Days Mood")
             ax.grid(alpha=.3)
             st.pyplot(fig, clear_figure=True)
 
-        # -------- AI SUMMARY --------
+            # -------- STREAK TRACKER --------
+            df_dates = dfp["date"].sort_values(ascending=False).drop_duplicates()
+            streak = 1
+            for i in range(1, len(df_dates)):
+                if (df_dates.iloc[i-1] - df_dates.iloc[i]).days == 1:
+                    streak += 1
+                else:
+                    break
+            st.markdown(f"""
+            <div class="card" style="background:linear-gradient(135deg,#22c55e,#16a34a);color:#0f172a;text-align:center;">
+                <b>🔥 Current Streak</b><br>
+                {streak} day(s) in a row
+            </div>
+            """, unsafe_allow_html=True)
+
+            # -------- PIE CHART: MOOD DISTRIBUTION --------
+            mood_counts = dfp["mood"].value_counts()
+            fig2, ax2 = plt.subplots(figsize=(4,4))
+            colors = ["#f87171","#fbbf24","#60a5fa","#34d399"]
+            ax2.pie(mood_counts, labels=mood_counts.index, autopct='%1.1f%%', startangle=90, colors=colors)
+            ax2.set_title("Mood Distribution (Last 7 Days)")
+            st.pyplot(fig2, clear_figure=True)
+            
+
+        # -------- SUMMARY CARDS --------
+        total_entries = len(df)
+        avg_score = round(df["mood"].map(score_map).mean(),2)
+        last_mood = df.iloc[0]["mood"]
+
+        st.markdown(f"""
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <div class="card" style="flex:1;background:linear-gradient(135deg,#2563eb,#3b82f6);text-align:center;">
+                <b>Total Entries</b><br>{total_entries}
+            </div>
+            <div class="card" style="flex:1;background:linear-gradient(135deg,#f59e0b,#fbbf24);text-align:center;">
+                <b>Average Mood Score</b><br>{avg_score}
+            </div>
+            <div class="card" style="flex:1;background:linear-gradient(135deg,#ef4444,#f87171);text-align:center;">
+                <b>Last Mood</b><br>{last_mood}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # -------- AI MOOD SUGGESTION --------
         mood_ai = analyze_sentiment(df.iloc[0]["note"])
-        st.markdown(f"### 🤖 AI Mood: **{mood_ai}**")
+        suggestion_map = {
+            "Sad 😔":"Try a short walk or write 3 things you’re grateful for 🌸",
+            "Low 😞":"Take 5 deep breaths or listen to calming music 🎧",
+            "Neutral 😐":"Keep journaling daily, small steps matter ✍️",
+            "Positive 😊":"Great! Share your joy with someone today 🌟"
+        }
+        st.markdown(f"**🤖 Mood:** {mood_ai}")
+        st.markdown(f"**💡 Suggestion:** {suggestion_map[mood_ai]}")
 
-        # -------- CHATBOT SECTION --------
-        st.markdown("### 💬 Talk to Your Mood Assistant")
-
-        if "chat_history" not in st.session_state:
-            st.session_state.chat_history = []
-
-        user_input = st.text_input("Type your feeling or question:")
-
-        if st.button("Send"):
-            if user_input.strip():
-                reply = ai_chatbot(user_input, df.iloc[0]["note"])
-                st.session_state.chat_history.append(("You", user_input))
-                st.session_state.chat_history.append(("AI", reply))
-
-        for sender, msg in st.session_state.chat_history:
-            if sender == "You":
-                st.markdown(f"🧑 **You:** {msg}")
-            else:
-                st.markdown(f"🤖 **AI:** {msg}")
-
-        # -------- ALL ENTRIES --------
-        st.markdown("### 📖 Your Journal")
+        # -------- ALL JOURNEY ENTRIES --------
         for m, n, p, d in data:
             st.markdown(f"""
             <div class="card">
@@ -209,6 +240,8 @@ elif page == "Dashboard":
                 <small>{d}</small><hr>{n}
             </div>
             """, unsafe_allow_html=True)
+
+
 # ---------------- ADD JOURNEY ----------------
 elif page == "Add Journey":
     st.subheader("📝 Add Entry")

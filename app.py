@@ -108,6 +108,32 @@ with st.sidebar:
         sidebar_btn("Logout")
 
     page = st.session_state.page
+    st.markdown("---")
+st.markdown("### 🤖 AI Companion")
+
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+
+with st.container():
+    user_msg = st.text_area(
+        "Talk to your AI 🧠",
+        placeholder="Type here...",
+        height=80,
+        key="chat_input"
+    )
+
+    if st.button("Send 💬", use_container_width=True):
+        if user_msg:
+            ai_reply = analyze_sentiment(user_msg)
+            st.session_state.chat_history.append(("You", user_msg))
+            st.session_state.chat_history.append(("AI", ai_reply))
+
+    for sender, msg in reversed(st.session_state.chat_history[-4:]):
+        if sender == "You":
+            st.markdown(f"🧑 **You:** {msg}")
+        else:
+            st.markdown(f"🤖 **AI:** {msg}")
+
 
     # ===============================
 # 🤖 AI CHATBOT (GLOBAL SIDEBAR)

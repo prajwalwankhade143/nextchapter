@@ -254,10 +254,10 @@ if page == "Two Broken Hearts" and st.session_state.get("logged_in", False):
                     f"<div style='background:#0f172a;color:white;padding:8px;border-radius:8px;margin-bottom:4px;'>❤️ {msg}</div>",
                     unsafe_allow_html=True
                 )
-                elif page == "Shayari" and st.session_state.get("logged_in", False):
+                # ---------------- Shayari ----------------
+elif page == "Shayari" and st.session_state.get("logged_in", False):
     st.subheader("💌 Shayari for Lovers")
 
-    # 10 Shayari
     shayari_list = [
         "दिल की हर धड़कन में तेरा नाम है 💖",
         "तुझसे मिलकर ही जीने का मज़ा आया 😍",
@@ -271,25 +271,21 @@ if page == "Two Broken Hearts" and st.session_state.get("logged_in", False):
         "तुम्हारे मुस्कुराने से ही दिन बन जाता है 🌸"
     ]
 
-    # Initialize index in session_state
     if "shayari_index" not in st.session_state:
         st.session_state.shayari_index = 0
 
-    # Show current shayari
     index = st.session_state.shayari_index
     st.markdown(
         f"<div style='background:#1f2933;padding:15px;border-radius:12px;color:#f87171;font-size:18px;'>{shayari_list[index]}</div>",
         unsafe_allow_html=True
     )
 
-    # Next button
     next_click = st.button("Aik Aur 💕", key="next_shayari")
     if next_click:
         st.session_state.shayari_index += 1
         if st.session_state.shayari_index >= len(shayari_list):
             st.session_state.shayari_index = 0
         st.experimental_rerun()
-
 # ---------------- REGISTER ----------------
 if page == "Register":
     st.markdown('<div class="card">', unsafe_allow_html=True)

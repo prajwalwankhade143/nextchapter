@@ -256,7 +256,6 @@ if page == "Two Broken Hearts" and st.session_state.get("logged_in", False):
                 )
                 # ===============================
 # 💔 Shayari Section
-# ===============================
 elif page == "Shayari" and st.session_state.get("logged_in", False):
 
     st.subheader("💔 Dil Se Shayari")
@@ -278,7 +277,7 @@ elif page == "Shayari" and st.session_state.get("logged_in", False):
         st.session_state.shayari_index = 0
 
     st.markdown(
-        f"<div style='background:#fce7f3;padding:15px;border-radius:10px;font-size:18px;'>"
+        f"<div style='background:#fce7f3;color:#000000;padding:15px;border-radius:10px;font-size:18px;'>"
         f"{shayari_list[st.session_state.shayari_index]}"
         f"</div>",
         unsafe_allow_html=True
@@ -286,6 +285,7 @@ elif page == "Shayari" and st.session_state.get("logged_in", False):
 
     if st.button("➕ Ek aur Shayari"):
         st.session_state.shayari_index = (st.session_state.shayari_index + 1) % len(shayari_list)
+        st.experimental_rerun()  # Force page refresh to show updated shayari
 
                 
 # ---------------- REGISTER ----------------

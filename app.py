@@ -417,22 +417,25 @@ elif page == "Dashboard":
         st.markdown(f"**🤖 Mood:** {mood_ai}")
         st.markdown(f"**💡 Suggestion:** {suggestion_map[mood_ai]}")
 
-        # -------- ALL JOURNEY ENTRIES --------
-       for m, n, p, d, media_type, media_path in data:
+# -------- ALL JOURNEY ENTRIES --------
+for m, n, p, d, media_type, media_path in data:
     st.markdown(f"""
-        <div class="card">
-            <b>{m} {'🔐' if p else ''}</b><br>
-            <small>{d}</small><hr>{n}
-        </div>
+    <div class="card">
+        <b>{m} {'🔐' if p else ''}</b><br>
+        <small>{d}</small><hr>
+        {n}
     """, unsafe_allow_html=True)
 
-    if media_type and media_path:
-        if media_type == "image":
-            st.image(media_path)
-        elif media_type == "video":
-            st.video(media_path)
-        elif media_type == "audio":
-            st.audio(media_path)
+    # Media rendering
+    if media_type == "image" and media_path:
+        st.image(media_path)
+    elif media_type == "video" and media_path:
+        st.video(media_path)
+    elif media_type == "audio" and media_path:
+        st.audio(media_path)
+    
+    st.markdown("</div>", unsafe_allow_html=True)
+
 # ---------------- ADD JOURNEY ----------------
 elif page == "Add Journey":
     st.subheader("📝 Add Entry")

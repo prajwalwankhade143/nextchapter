@@ -332,12 +332,15 @@ elif page == "Dashboard":
 
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("""SELECT mood,note,is_private,created_at 
-                   FROM journey WHERE user_email=? 
-                   ORDER BY created_at DESC""",
-                (st.session_state.user_email,))
+    cur.execute("""
+        SELECT mood, note, is_private, created_at, media_type, media_path
+        FROM journey
+        WHERE user_email = ?
+        ORDER BY created_at DESC
+    """, (st.session_state.user_email,))
     data = cur.fetchall()
     conn.close()
+
 
     if not data:
         st.info("No entries yet ✍️")
@@ -415,27 +418,54 @@ elif page == "Dashboard":
         st.markdown(f"**💡 Suggestion:** {suggestion_map[mood_ai]}")
 
         # -------- ALL JOURNEY ENTRIES --------
-        for m, n, p, d in data:
-            st.markdown(f"""
-            <div class="card">
-                <b>{m} {'🔐' if p else ''}</b><br>
-                <small>{d}</small><hr>{n}
-            </div>
-            """, unsafe_allow_html=True)
+       for m, n, p, d, media_type, media_path in data:
+    st.markdown(f"""
+        <div class="card">
+            <b>{m} {'🔐' if p else ''}</b><br>
+            <small>{d}</small><hr>{n}
+        </div>
+    """, unsafe_allow_html=True)
 
-
+    if media_type and media_path:
+        if media_type == "image":
+            st.image(media_path)
+        elif media_type == "video":
+            st.video(media_path)
+        elif media_type == "audio":
+            st.audio(media_path)
 # ---------------- ADD JOURNEY ----------------
 elif page == "Add Journey":
     st.subheader("📝 Add Entry")
-    mood=st.selectbox("Mood",["Sad 😔","Low 😞","Neutral 😐","Positive 😊"])
-    note=st.text_area("Write here")
+
+    mood = st.selectbox("Mood", ["Sad 😔", "Low 😞", "Neutral 😐", "Positive 😊"])
+    note = st.text_area("Write here")
     private=st.checkbox("Private 🔐")
+
+    media_file = st.file_uploader(
+        "Upload image, video, or audio (optional)",
+        type=["png","jpg","jpeg","mp4","mp3","wav"]
+    )
+
     if st.button("Save"):
-        conn=get_connection()
-        cur=conn.cursor()
-        cur.execute("INSERT INTO journey (user_email,mood,note,is_private) VALUES (?,?,?,?)",
-                    (st.session_state.user_email,mood,note,int(private)))
-        conn.commit();conn.close()
+        file_path = None
+        media_type = None
+
+        if media_file:
+            media_type = media_file.type.split("/")[0]  # image/video/audio
+            file_path = f"media/{media_file.name}"
+            with open(file_path, "wb") as f:
+                f.write(media_file.getbuffer())
+
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute(
+            """INSERT INTO journey (user_email,mood,note,is_private,media_type,media_path)
+               VALUES (?,?,?,?,?,?)""",
+            (st.session_state.user_email, mood, note, int(False),
+             media_type, file_path)
+        )
+        conn.commit()
+        conn.close()
         st.success("Saved 🌸")
 
 # ---------------- ANALYZE ----------------

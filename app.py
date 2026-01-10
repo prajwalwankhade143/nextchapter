@@ -96,11 +96,11 @@ with st.sidebar:
     st.markdown("## 📍 Menu")
 
     def sidebar_btn(label):
-        active = st.session_state.page == label
+        active = st.session_state.get("page", "") == label
         if st.button(label, use_container_width=True):
             st.session_state.page = label
 
-    if not st.session_state.logged_in:
+    if not st.session_state.get("logged_in", False):
         sidebar_btn("Register")
         sidebar_btn("Login")
     else:
@@ -110,14 +110,14 @@ with st.sidebar:
         sidebar_btn("Letters")
         sidebar_btn("Breakup Timeline")
         sidebar_btn("Gratitude")
-        sidebar_btn("Two Broken Hearts")
+        sidebar_btn("Two Broken Hearts")  # Feature button
 
-        
-        if st.session_state.user_email == "admin@example.com":  # Replace with your admin email
+        if st.session_state.get("user_email") == "admin@example.com":  # Replace with your admin email
             sidebar_btn("Admin")
         sidebar_btn("Logout")
 
-    page = st.session_state.page
+    # Current page
+    page = st.session_state.get("page", "Login")
     st.markdown("---")
 
     # ===============================
@@ -179,69 +179,79 @@ with st.sidebar:
                     f"<div style='background:#2563eb;color:#ffffff;padding:8px;border-radius:8px;margin-bottom:4px;'>🤖 <b>AI:</b> {msg}</div>",
                     unsafe_allow_html=True
                 )# ===============================
-# 💔 Two Broken Hearts (NEW FEATURE)
 # ===============================
-st.markdown("---")
-st.markdown("### 💔 Two Broken Hearts")
+# Two Broken Hearts Feature
+# ===============================
+if page == "Two Broken Hearts" and st.session_state.get("logged_in", False):
 
-if "public_pool" not in st.session_state:
-    st.session_state.public_pool = []
+    # Optional: Click to enter the feature (can remove if not needed)
+    if "hearts_access" not in st.session_state:
+        st.session_state.hearts_access = False
 
-if "connected" not in st.session_state:
-    st.session_state.connected = False
+    if not st.session_state.hearts_access:
+        if st.button("Open 💔 Two Broken Hearts"):
+            st.session_state.hearts_access = True
 
-if "private_chat" not in st.session_state:
-    st.session_state.private_chat = []
+    if st.session_state.hearts_access:
+        st.markdown("---")
+        st.markdown("### 💔 Two Broken Hearts")
 
-# 1️⃣ User writes heart message
-heart_msg = st.text_area(
-    "",
-    placeholder="Write what your heart feels… 💗",
-    height=70,
-    key="heart_pool_msg",
-    label_visibility="collapsed"
-)
+        if "public_pool" not in st.session_state:
+            st.session_state.public_pool = []
 
-if st.button("Share Anonymously 💌", use_container_width=True):
-    if heart_msg.strip():
-        st.session_state.public_pool.append(heart_msg)
-        st.success("Shared anonymously 💞")
+        if "connected" not in st.session_state:
+            st.session_state.connected = False
 
-# 2️⃣ Another user reads & connects
-if not st.session_state.connected:
-    if st.session_state.public_pool:
-        st.markdown("**Someone else shared:**")
-        for i, msg in enumerate(reversed(st.session_state.public_pool[-2:])):
-            st.markdown(
-                f"<div style='background:#f1f5f9;padding:8px;border-radius:8px;margin-bottom:6px;'>💬 {msg}</div>",
-                unsafe_allow_html=True
-            )
-            if st.button("Connect 💗", key=f"connect_{i}"):
-                st.session_state.connected = True
-                break
-    else:
-        st.info("No shared feelings yet 💭")
+        if "private_chat" not in st.session_state:
+            st.session_state.private_chat = []
 
-# 3️⃣ Private room (only two people)
-else:
-    st.markdown("### 🔐 Private Space")
-
-    private_msg = st.text_input(
-        "Say something from heart…",
-        key="private_space_msg"
-    )
-
-    if st.button("Send ❤️", use_container_width=True):
-        if private_msg.strip():
-            st.session_state.private_chat.insert(0, private_msg)
-
-    for msg in st.session_state.private_chat[:5]:
-        st.markdown(
-            f"<div style='background:#0f172a;color:white;padding:8px;border-radius:8px;margin-bottom:4px;'>❤️ {msg}</div>",
-            unsafe_allow_html=True
+        # 1️⃣ User writes heart message
+        heart_msg = st.text_area(
+            "",
+            placeholder="Write what your heart feels… 💗",
+            height=70,
+            key="heart_pool_msg",
+            label_visibility="collapsed"
         )
 
+        if st.button("Share Anonymously 💌", use_container_width=True):
+            if heart_msg.strip():
+                st.session_state.public_pool.append(heart_msg)
+                st.success("Shared anonymously 💞")
 
+        # 2️⃣ Another user reads & connects
+        if not st.session_state.connected:
+            if st.session_state.public_pool:
+                st.markdown("**Someone else shared:**")
+                for i, msg in enumerate(reversed(st.session_state.public_pool[-2:])):
+                    st.markdown(
+                        f"<div style='background:#f1f5f9;padding:8px;border-radius:8px;margin-bottom:6px;'>💬 {msg}</div>",
+                        unsafe_allow_html=True
+                    )
+                    if st.button("Connect 💗", key=f"connect_{i}"):
+                        st.session_state.connected = True
+                        break
+            else:
+                st.info("No shared feelings yet 💭")
+
+        # 3️⃣ Private room (only two people)
+        else:
+            st.markdown("### 🔐 Private Space")
+
+            private_msg = st.text_input(
+                "Say something from heart…",
+                key="private_space_msg"
+            )
+
+            if st.button("Send ❤️", use_container_width=True):
+                if private_msg.strip():
+                    st.session_state.private_chat.insert(0, private_msg)
+
+            for msg in st.session_state.private_chat[:5]:
+                st.markdown(
+                    f"<div style='background:#0f172a;color:white;padding:8px;border-radius:8px;margin-bottom:4px;'>❤️ {msg}</div>",
+                    unsafe_allow_html=True
+                )
 # ---------------- REGISTER ----------------
 if page == "Register":
     st.markdown('<div class="card">', unsafe_allow_html=True)

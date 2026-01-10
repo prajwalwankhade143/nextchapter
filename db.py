@@ -1,6 +1,11 @@
 import sqlite3
+import os
 
 def get_connection():
+    # Ensure folder exists if you want to store media later
+    os.makedirs("media/images", exist_ok=True)
+    os.makedirs("media/videos", exist_ok=True)
+
     conn = sqlite3.connect("nextchapter.db", check_same_thread=False)
     cur = conn.cursor()
 
@@ -54,6 +59,18 @@ def get_connection():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_email TEXT,
         note TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    # ----------------- NEW POSTS TABLE -----------------
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS posts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT,
+        post_text TEXT,
+        image_path TEXT,
+        video_path TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)

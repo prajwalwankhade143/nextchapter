@@ -112,6 +112,8 @@ with st.sidebar:
         sidebar_btn("Gratitude")
         sidebar_btn("Two Broken Hearts")  # Feature button
         sidebar_btn("Shayari")  # shayri section
+        sidebar_btn("Posts")  # Add this below Shayari
+
 
         if st.session_state.get("user_email") == "prajwalwankhade202@gmail.com":  # Replace with your admin email
             sidebar_btn("Admin")
@@ -293,6 +295,65 @@ elif page == "Shayari" and st.session_state.get("logged_in", False):
     if st.button("➕ Ek aur Shayari"):
         st.session_state.shayari_index = (st.session_state.shayari_index + 1) % len(shayari_list)
         # Streamlit automatically reruns page, no st.experimental_rerun() needed
+        # ===============================
+# Posts Section
+# ===============================
+elif page == "Posts" and st.session_state.get("logged_in", False):
+    st.subheader("🖼️ Share a Post")
+
+    post_text = st.text_area("Write something...", height=80)
+    image_file = st.file_uploader("Upload Image", type=["png","jpg","jpeg"], key="post_image")
+    video_file = st.file_uploader("Upload Video", type=["mp4","mov","avi"], key="post_video")
+
+    if st.button("Post", use_container_width=True):
+        conn = get_connection()
+        cur = conn.cursor()
+
+        image_path = None
+        video_path = None
+
+        # Save image
+        if image_file:
+            image_path = f"media/images/{image_file.name}"
+            os.makedirs(os.path.dirname(image_path), exist_ok=True)
+            with open(image_path, "wb") as f:
+                f.write(image_file.getbuffer())
+
+        # Save video
+        if video_file:
+            video_path = f"media/videos/{video_file.name}"
+            os.makedirs(os.path.dirname(video_path), exist_ok=True)
+            with open(video_path, "wb") as f:
+                f.write(video_file.getbuffer())
+
+        # Insert post into DB
+        cur.execute("""
+            INSERT INTO posts (user_email, post_text, image_path, video_path)
+            VALUES (?, ?, ?, ?)
+        """, (st.session_state.user_email, post_text, image_path, video_path))
+        conn.commit(); conn.close()
+        st.success("Posted! 🎉")
+
+    st.markdown("---")
+    st.subheader("📢 Feed")
+
+    # Display posts (newest first)
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT user_email, post_text, image_path, video_path, created_at FROM posts ORDER BY created_at DESC")
+    posts = cur.fetchall()
+    conn.close()
+
+    for user_email, text, img, vid, created_at in posts:
+        st.markdown(f"<b>{user_email}</b> <small>{created_at}</small>", unsafe_allow_html=True)
+        if text:
+            st.markdown(f"{text}")
+        if img:
+            st.image(img, use_column_width=True)
+        if vid:
+            st.video(vid)
+        st.markdown("---")
+
 
                 
 # ---------------- REGISTER ----------------

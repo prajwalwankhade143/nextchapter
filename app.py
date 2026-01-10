@@ -110,67 +110,7 @@ with st.sidebar:
         sidebar_btn("Letters")
         sidebar_btn("Breakup Timeline")
         sidebar_btn("Gratitude")
-        elif page == "Two Broken Hearts":
-
-    st.markdown("---")
-    st.markdown("### 💔 Two Broken Hearts")
-
-    if "public_pool" not in st.session_state:
-        st.session_state.public_pool = []
-
-    if "connected" not in st.session_state:
-        st.session_state.connected = False
-
-    if "private_chat" not in st.session_state:
-        st.session_state.private_chat = []
-
-    # 1️⃣ User writes heart message
-    heart_msg = st.text_area(
-        "",
-        placeholder="Write what your heart feels… 💗",
-        height=70,
-        key="heart_pool_msg",
-        label_visibility="collapsed"
-    )
-
-    if st.button("Share Anonymously 💌", use_container_width=True):
-        if heart_msg.strip():
-            st.session_state.public_pool.append(heart_msg)
-            st.success("Shared anonymously 💞")
-
-    # 2️⃣ Another user reads & connects
-    if not st.session_state.connected:
-        if st.session_state.public_pool:
-            st.markdown("**Someone else shared:**")
-            for i, msg in enumerate(reversed(st.session_state.public_pool[-2:])):
-                st.markdown(
-                    f"<div style='background:#f1f5f9;padding:8px;border-radius:8px;margin-bottom:6px;'>💬 {msg}</div>",
-                    unsafe_allow_html=True
-                )
-                if st.button("Connect 💗", key=f"connect_{i}"):
-                    st.session_state.connected = True
-                    break
-        else:
-            st.info("No shared feelings yet 💭")
-
-    # 3️⃣ Private room
-    else:
-        st.markdown("### 🔐 Private Space")
-
-        private_msg = st.text_input(
-            "Say something from heart…",
-            key="private_space_msg"
-        )
-
-        if st.button("Send ❤️", use_container_width=True):
-            if private_msg.strip():
-                st.session_state.private_chat.insert(0, private_msg)
-
-        for msg in st.session_state.private_chat[:5]:
-            st.markdown(
-                f"<div style='background:#0f172a;color:white;padding:8px;border-radius:8px;margin-bottom:4px;'>❤️ {msg}</div>",
-                unsafe_allow_html=True
-            )
+        sidebar_btn("Two Broken Hearts")
 
         
         if st.session_state.user_email == "admin@example.com":  # Replace with your admin email

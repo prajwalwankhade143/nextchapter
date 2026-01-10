@@ -111,6 +111,7 @@ with st.sidebar:
         sidebar_btn("Breakup Timeline")
         sidebar_btn("Gratitude")
         sidebar_btn("Two Broken Hearts")  # Feature button
+        sidebar_btn("Shayari")  # shayri section
 
         if st.session_state.get("user_email") == "admin@example.com":  # Replace with your admin email
             sidebar_btn("Admin")
@@ -179,6 +180,7 @@ with st.sidebar:
                     f"<div style='background:#2563eb;color:#ffffff;padding:8px;border-radius:8px;margin-bottom:4px;'>🤖 <b>AI:</b> {msg}</div>",
                     unsafe_allow_html=True
                 )# ===============================
+                
 # ===============================
 # Two Broken Hearts Feature
 # ===============================
@@ -252,6 +254,42 @@ if page == "Two Broken Hearts" and st.session_state.get("logged_in", False):
                     f"<div style='background:#0f172a;color:white;padding:8px;border-radius:8px;margin-bottom:4px;'>❤️ {msg}</div>",
                     unsafe_allow_html=True
                 )
+                elif page == "Shayari" and st.session_state.get("logged_in", False):
+    st.subheader("💌 Shayari for Lovers")
+
+    # 10 Shayari
+    shayari_list = [
+        "दिल की हर धड़कन में तेरा नाम है 💖",
+        "तुझसे मिलकर ही जीने का मज़ा आया 😍",
+        "तेरी यादों की खुशबू हर पल मेरे साथ है 💌",
+        "मोहब्बत में सही-गलत नहीं होती, बस एहसास होता है ❤️",
+        "कभी मुस्कुराना याद रखना, किसी की दिल में तू बसता है 😊",
+        "तेरे बिना अधूरी सी है जिंदगी 💔",
+        "तुम मेरी हर दुआ में शामिल हो 💕",
+        "दिल से दिल तक का रास्ता बस तुम्हारे नाम है 💓",
+        "हर पल तेरी याद आती है 😢",
+        "तुम्हारे मुस्कुराने से ही दिन बन जाता है 🌸"
+    ]
+
+    # Initialize index in session_state
+    if "shayari_index" not in st.session_state:
+        st.session_state.shayari_index = 0
+
+    # Show current shayari
+    index = st.session_state.shayari_index
+    st.markdown(
+        f"<div style='background:#1f2933;padding:15px;border-radius:12px;color:#f87171;font-size:18px;'>{shayari_list[index]}</div>",
+        unsafe_allow_html=True
+    )
+
+    # Next button
+    next_click = st.button("Aik Aur 💕", key="next_shayari")
+    if next_click:
+        st.session_state.shayari_index += 1
+        if st.session_state.shayari_index >= len(shayari_list):
+            st.session_state.shayari_index = 0
+        st.experimental_rerun()
+
 # ---------------- REGISTER ----------------
 if page == "Register":
     st.markdown('<div class="card">', unsafe_allow_html=True)

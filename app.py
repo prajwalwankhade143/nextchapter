@@ -256,10 +256,14 @@ if page == "Two Broken Hearts" and st.session_state.get("logged_in", False):
                 )
                 # ===============================
 # 💔 Shayari Section
+# ===============================
+# 💔 Shayari Section
+# ===============================
 elif page == "Shayari" and st.session_state.get("logged_in", False):
 
     st.subheader("💔 Dil Se Shayari")
 
+    # List of shayari
     shayari_list = [
         "तुम्हारे बाद कोई अच्छा नहीं लगा… और तुम्हारे पहले कोई खास नहीं था।",
         "हम टूटे नहीं, बस चुप हो गए हैं।",
@@ -273,9 +277,11 @@ elif page == "Shayari" and st.session_state.get("logged_in", False):
         "कुछ लोग हमेशा के लिए नहीं होते।"
     ]
 
+    # Initialize shayari index
     if "shayari_index" not in st.session_state:
         st.session_state.shayari_index = 0
 
+    # Display current shayari
     st.markdown(
         f"<div style='background:#fce7f3;color:#000000;padding:15px;border-radius:10px;font-size:18px;'>"
         f"{shayari_list[st.session_state.shayari_index]}"
@@ -283,9 +289,10 @@ elif page == "Shayari" and st.session_state.get("logged_in", False):
         unsafe_allow_html=True
     )
 
+    # Button to show next shayari
     if st.button("➕ Ek aur Shayari"):
         st.session_state.shayari_index = (st.session_state.shayari_index + 1) % len(shayari_list)
-        st.experimental_rerun()  # Force page refresh to show updated shayari
+        # Streamlit automatically reruns page, no st.experimental_rerun() needed
 
                 
 # ---------------- REGISTER ----------------
